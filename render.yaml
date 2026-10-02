@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: ethos-tribo
+    runtime: python
+    plan: free
+    region: ohio
+    buildCommand: python -m zipfile -e ethos-source.zip release && pip install -r release/requirements.txt
+    startCommand: cd release && python -m app.bootstrap && uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1 --proxy-headers --forwarded-allow-ips '*'
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: APP_ENV
+        value: production
+      - key: SECURE_COOKIES
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: BASE_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
