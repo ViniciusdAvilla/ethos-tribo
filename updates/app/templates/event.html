@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-heading"><a href="/#proximos-encontros" class="back-link">← Todos os encontros</a><span class="eyebrow eyebrow-dark">ENCONTRO ETHOS</span><h1>{{event.title}}</h1><p>{{event.description or 'Um encontro para criar conexões e histórias fora da tela.'}}</p></div>
+<div class="event-layout">
+ <section class="event-main">
+   {% if member_logged_in %}<div class="event-feature"><span class="big-volley" aria-hidden="true">🏐</span><span class="feature-text">PRESENÇA<br>EM JOGO<span>.</span></span></div>
+   {% endif %}<div class="info-card"><h2>O encontro</h2><div class="fact-grid"><div class="fact"><span class="fact-icon">▣</span><div><small>DATA E HORÁRIO</small><strong>{{event.event_date | date_br}}</strong><span>{{event.starts_at | time_br}} às {{event.ends_at | time_br}}</span></div></div><div class="fact"><span class="fact-icon">⌾</span><div><small>ONDE VAI SER</small><strong>{{event.location_name}}</strong><span>{{event.address}}</span>{% if event.maps_url %}<a href="{{ event.maps_url }}" target="_blank" rel="noopener noreferrer">Abrir mapa ↗</a>{% endif %}</div></div><div class="fact"><span class="fact-icon">◎</span><div><small>ESTRUTURA</small><strong>{{event.court_count}} quadra{{'s' if event.court_count != 1 else ''}}</strong><span>{{event.capacity}} vagas no total</span></div></div><div class="fact"><span class="fact-icon">↗</span><div><small>INVESTIMENTO</small><strong>{{event.price_cents | money}}</strong><span>{% if event.pix_key %}Pagamento via Pix{% else %}Consulte a organização{% endif %}</span></div></div></div></div>
+   {% if public_names %}<div class="info-card"><h2>Quem já confirmou presença</h2><div class="attendee-names">{% for name in public_names %}<span><b>{{name[0]|upper}}</b>{{name}}</span>{% endfor %}</div><p class="note">Apenas participantes que autorizaram a exibição do primeiro nome aparecem aqui.</p></div>{% endif %}
+   <div class="info-card info-highlight"><h2>Compartilhe o encontro</h2><p>Chame os amigos: experiências são melhores quando são compartilhadas.</p><div class="copy-row"><input readonly value="{{shared_link}}" id="event-link" aria-label="Link do encontro"><button class="btn btn-outline" type="button" data-copy-target="event-link">Copiar link</button></div></div>
+ </section>
+ <aside class="signup-side"><div class="signup-card"><span class="eyebrow eyebrow-dark">GARANTA SEU LUGAR</span><h2>Vamos nessa?</h2><p>{% if event.mode == "list" %}Preencha seus dados para entrar na lista do encontro.{% elif event.mode == "paid" %}Entre com sua conta e pague com Pix. Seus dados são preenchidos automaticamente.{% else %}Participe gratuitamente usando sua conta, sem preencher dados novamente.{% endif %}</p>
+   <div class="stat-band"><div><small>CONFIRMADOS</small><strong>{{confirmed}}<span>/{{event.capacity}}</span></strong></div>{% if event.mode == "list" %}<div><small>AGUARDANDO</small><strong>{{waiting}}</strong></div>{% endif %}</div>
+   {% if event.is_closed %}<div class="inline-alert">As inscrições deste encontro estão encerradas.</div>
+   {% else %}
+   {% if confirmed >= event.capacity and event.mode == "list" %}<div class="inline-alert">As vagas estão preenchidas. Inscreva-se na lista de espera: você poderá ser promovido caso surja uma vaga.</div>{% endif %}
+   {% if error %}<div class="form-error" role="alert">{{error}}</div>{% endif %}
+   {% if event.mode != 'list' %}
+   {% if confirmed >= event.capacity %}<p class="inline-alert">Não há vagas disponíveis.</p>{% elif member_logged_in %}<form method="post" action="/evento/{{event.slug}}/participar"><input type="hidden" name="csrf" value="{{csrf}}"><button class="btn btn-primary btn-block btn-large">{{'Ir para pagamento Pix' if event.mode == 'paid' else 'Participar gratuitamente'}} →</button></form>{% else %}<a href="/conta/entrar" class="btn btn-primary btn-block">Entrar para participar →</a><p class="note">Depois de entrar, volte a este encontro. Usaremos os dados da sua conta.</p>{% endif %}
+   {% else %}<form action="/evento/{{event.slug}}/inscrever" method="post" class="form-stack">
+      <input type="hidden" name="csrf" value="{{csrf}}">
+      <label>Seu nome completo <span>*</span><input name="full_name" autocomplete="name" required maxlength="140" minlength="3" placeholder="Como prefere ser chamado?" value="{{ fields.full_name if fields else '' }}"></label>
+      <label>WhatsApp com DDD <span>*</span><input name="phone" type="tel" required inputmode="tel" autocomplete="tel" placeholder="(41) 99999-9999" maxlength="20" value="{{ fields.phone if fields else '' }}"></label>
+      <label>E-mail <small>(opcional)</small><input name="email" type="email" autocomplete="email" maxlength="254" placeholder="voce@exemplo.com" value="{{ fields.email if fields else '' }}"></label>
+      <label class="checkbox-line"><input type="checkbox" name="consent" value="yes" required><span>Autorizo o uso dos meus dados para a organização deste encontro. <a href="/privacidade" target="_blank" rel="noopener">Entenda como usamos seus dados</a>.</span></label>
+      <label class="checkbox-line"><input type="checkbox" name="show_name" value="yes"><span>Meu primeiro nome pode aparecer na lista pública deste evento. <small>(opcional)</small></span></label>
+      <button class="btn btn-primary btn-block btn-large" type="submit">{% if confirmed >= event.capacity %}Entrar na lista de espera{% else %}Confirmar inscrição{% endif %} →</button>
+      <p class="form-disclaimer">A inscrição não confirma o pagamento. Guarde o link de acompanhamento que aparecerá depois.</p>
+   </form>{% endif %}{% endif %}
+   {% if event.pix_key and event.mode == "list" %}<div class="pix-panel"><div><small>CHAVE PIX DO ORGANIZADOR</small><strong>{{event.pix_key}}</strong></div><button class="copy-icon" type="button" data-copy-text="{{event.pix_key}}" aria-label="Copiar chave Pix">⧉</button></div><p class="pix-note">Valor: {{event.price_cents | money}}. Confirme o pagamento com a organização; não há verificação bancária automática.</p>{% endif %}
+ </div></aside>
+</div>
+{% endblock %}

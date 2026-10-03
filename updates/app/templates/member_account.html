@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="member-area">
+ <span class="eyebrow eyebrow-dark">ÁREA EXCLUSIVA</span>
+ <h1>Olá, {{member.full_name.split(' ')[0]}}!</h1><p>Você está conectado à Ethos Eventos. Sua próxima história começa com um encontro real.</p>
+ <div class="member-banner"><span>VOCÊ FAZ PARTE DA TRIBO</span><h2>PRESENÇA<br>EM JOGO<span>.</span></h2><p>Explore os próximos eventos e participe.</p><a class="btn btn-primary" href="/#proximos-encontros">Ver próximos encontros ↗</a></div>
+ <section class="admin-panel"><h2>Minhas atividades</h2>{% for registration in registrations %}<article class="account-activity"><div><strong>{{registration.event.title}}</strong><p>{{registration.event.event_date|date_br}} · {{'Pago' if registration.payment_status=='paid' else 'Gratuito' if registration.payment_status=='exempt' else 'Pagamento pendente'}} · {{'Cancelado' if registration.status=='cancelled' else 'Check-in feito' if registration.attended else 'Inscrito'}}</p></div><a class="btn btn-outline" href="/conta/inscricoes/{{registration.id}}">Acompanhar →</a></article>{% else %}<p>Você ainda não participou de uma atividade com sua conta.</p>{% endfor %}</section><div class="member-account-footer"><p>Inscrições feitas anteriormente por formulário são acompanhadas pelo link privado que foi entregue no ato da inscrição, sem associação automática por e-mail.</p>
+ <form action="/conta/sair" method="post"><input type="hidden" name="csrf" value="{{csrf}}"><button class="btn btn-outline" type="submit">Sair da conta</button></form></div>
+</main>
+{% endblock %}

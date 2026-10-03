@@ -7,6 +7,13 @@ from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode, unquote
 import psycopg
 from psycopg import sql
 
+import shutil
+from pathlib import Path
+
+# Apply version-controlled text sources over the preserved original-site asset bundle.
+shutil.copytree("updates", "release", dirs_exist_ok=True)
+subprocess.run([sys.executable, "-m", "pip", "install", "-r", "release/requirements-dev.txt"], check=True)
+
 raw = os.environ["TEST_DATABASE_URL"]
 parts = urlsplit(raw)
 host = parts.netloc.replace("-pooler.", ".")
