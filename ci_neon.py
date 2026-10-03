@@ -36,4 +36,6 @@ try:
 finally:
     with psycopg.connect(direct, autocommit=True) as connection:
         connection.execute(sql.SQL("DROP SCHEMA {} CASCADE").format(sql.Identifier(schema)))
+if code == 0 and os.environ.get("LIVE_FEATURE_TESTS") == "true":
+    subprocess.run([sys.executable, "smoke_features.py"], check=True)
 sys.exit(code)
