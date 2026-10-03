@@ -168,7 +168,10 @@ def payment_poll(reg_id: int, request: Request, db: Session = Depends(get_db)):
 
 @router.post("/webhooks/pix")
 async def pix_webhook(request: Request, db: Session = Depends(get_db)):
-    if int(request.headers.get("content-length", "0")) > 32000:
+    length = request.headers.get("content-length", "0")
+    if not length.isdigit():
+        raise HTTPException(400)
+    if int(length) > 32000:
         raise HTTPException(413)
     raw = await request.body()
     if len(raw) > 32000:

@@ -74,6 +74,8 @@ def decode_image(raw):
         with Image.open(io.BytesIO(raw)) as source:
             if source.format not in ("JPEG", "PNG", "WEBP"):
                 raise ValueError("Formato não permitido. Use JPG, PNG ou WebP.")
+            if source.width * source.height > 24_000_000:
+                raise ValueError("A foto deve ter até 24 megapixels.")
             source.load()
             image = ImageOps.exif_transpose(source).convert("RGB")
     except (UnidentifiedImageError, OSError, Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
